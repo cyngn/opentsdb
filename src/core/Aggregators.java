@@ -71,7 +71,10 @@ public final class Aggregators {
    * if timestamps don't line up instead of interpolating. */
   public static final Aggregator MIMMAX = new Max(
       Interpolation.MIN, "mimmax");
-  
+
+  /** Aggregator that returns the number of data points. */
+  public static final Aggregator COUNT = new Count();
+
   /** Maps an aggregator name to its instance. */
   private static final HashMap<String, Aggregator> aggregators;
 
@@ -108,6 +111,7 @@ public final class Aggregators {
     aggregators.put("max", MAX);
     aggregators.put("avg", AVG);
     aggregators.put("dev", DEV);
+    aggregators.put("count", COUNT);
     aggregators.put("zimsum", ZIMSUM);
     aggregators.put("mimmin", MIMMIN);
     aggregators.put("mimmax", MIMMAX);
@@ -425,4 +429,37 @@ public final class Aggregators {
     }
 
   }
+
+  private static final class Count implements Aggregator {
+
+      @Override
+      public long runLong(Longs values) {
+        long result = 0;
+        while (values.hasNextValue()) {
+          values.nextLongValue();
+          result++;
+        }
+        return result;
+      }
+
+      @Override
+      public double runDouble(Doubles values) {
+        double result = 0;
+        while (values.hasNextValue()) {
+          values.nextDoubleValue();
+          result++;
+        }
+        return result;
+      }
+
+      public String toString() {
+        return "count";
+      }
+
+      @Override
+      public Interpolation interpolationMethod() {
+        return Aggregators.Interpolation.LERP;
+      }
+    }
+
 }
